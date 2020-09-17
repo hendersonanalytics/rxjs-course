@@ -3,8 +3,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import {Course} from "../model/course";
 import {FormBuilder, Validators, FormGroup} from "@angular/forms";
 import * as moment from 'moment';
-import {from, fromEvent} from 'rxjs';
-import {concatMap, distinctUntilChanged, exhaustMap, filter, mergeMap} from 'rxjs/operators';
+import {from, fromEvent, pipe} from 'rxjs';
+import {concatMap, distinctUntilChanged, exhaustMap, filter, mergeMap } from 'rxjs/operators';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import { APP_API } from 'app/constants/api';
 
@@ -57,8 +57,13 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-
-
+      fromEvent(this.saveButton.nativeElement, 'click')
+        .pipe(
+          // exhaustMap prevents clicks from being acted upon while
+          // the inner observable is still in the process of being
+          // completed
+          exhaustMap(() => this.saveCourse(this.form.value))
+        ).subscribe();
     }
 
 
