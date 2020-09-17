@@ -19,6 +19,6 @@ export class AboutComponent implements OnInit {
     );
 
     const result$ = merge(interval1$, interval2$, interval3$);
-    result$.subscribe(val => console.log(val));
+    // result$.subscribe(val => console.log(val));
   }
 }

@@ -42,9 +42,7 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
       this.form.valueChanges
         .pipe(
           filter(() => this.form.valid),
-          // concatMap guarantees that the current inner obseravble completes before
-          // subscribing to the next one
-          concatMap(changes => this.saveCourse(changes))
+          mergeMap(changes => this.saveCourse(changes))
         ).subscribe();
     }
 
