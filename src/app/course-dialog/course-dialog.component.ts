@@ -66,8 +66,6 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
         ).subscribe();
     }
 
-
-
     close() {
         this.dialogRef.close();
     }
