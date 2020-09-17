@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { concat, interval, of } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
+import { concat, interval, merge, of } from 'rxjs';
+import { concatMap, delay, map } from 'rxjs/operators';
 
 @Component({
   selector: 'about',
@@ -12,12 +12,13 @@ export class AboutComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    const source1$ = of(1,2,3);
-    const source2$ = of(4,5,6);
-    const source3$ = of(7,8,9);
+    const interval1$ = interval(1000);
+    const interval2$ = interval(2500);
+    const interval3$ = interval1$.pipe(
+      map(val => 10 * val)
+    );
 
-    // concat only starts the next observable after the previous one has completed
-    const result$ = concat(source1$, source2$, source3$);
+    const result$ = merge(interval1$, interval2$, interval3$);
     result$.subscribe(val => console.log(val));
   }
 }
