@@ -18,3 +18,7 @@ export function createHttpObservable(url: string) : Observable<any> {
       return () => abortController.abort();
   });
 }
+
+export function getLessonsQueryParams(courseId: number) {
+  return `?courseId=${courseId}&pageSize=100`
+}

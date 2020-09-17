@@ -15,6 +15,8 @@ import {
 } from 'rxjs/operators';
 import {merge, fromEvent, Observable, concat} from 'rxjs';
 import {Lesson} from '../model/lesson';
+import { createHttpObservable, getLessonsQueryParams } from 'app/common/util';
+import { APP_API } from 'app/constants/api';
 
 
 @Component({
@@ -37,11 +39,10 @@ export class CourseComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-
         const courseId = this.route.snapshot.params['id'];
-
-
-
+        this.course$ = createHttpObservable(`${APP_API.GET_COURSES}/${courseId}`);
+        this.lessons$ = createHttpObservable(`${APP_API.GET_LESSONS}${getLessonsQueryParams(courseId)}`)
+          .pipe(map(response => response.payload));
     }
 
     ngAfterViewInit() {
