@@ -19,6 +19,7 @@ export function createHttpObservable(url: string) : Observable<any> {
   });
 }
 
-export function getLessonsQueryParams(courseId: number) {
-  return `?courseId=${courseId}&pageSize=100`
+export function getLessonsQueryParams(courseId: number, searchTerm: string = '') {
+
+  return `?courseId=${courseId}&pageSize=100` + (searchTerm ? `&filter=${searchTerm}` : '');
 }

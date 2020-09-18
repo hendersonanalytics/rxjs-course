@@ -26,35 +26,36 @@ import { APP_API } from 'app/constants/api';
 })
 export class CourseComponent implements OnInit, AfterViewInit {
 
+  public courseId: number = this.route.snapshot.params['id'];
+  course$: Observable<Course>;
+  lessons$: Observable<Lesson[]>;
 
-    course$: Observable<Course>;
-    lessons$: Observable<Lesson[]>;
+  @ViewChild('searchInput', { static: true }) input: ElementRef;
 
+  constructor(private route: ActivatedRoute) {
 
-    @ViewChild('searchInput', { static: true }) input: ElementRef;
+  }
 
-    constructor(private route: ActivatedRoute) {
+  ngOnInit() {
+      this.course$ = createHttpObservable(`${APP_API.GET_COURSES}/${this.courseId}`);
+      this.lessons$ = this.loadLessons();
+  }
 
+  ngAfterViewInit() {
+    const initialLessons$ = this.loadLessons();
+    const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+      .pipe(
+        map(event => event['target'].value),
+        debounceTime(200),
+        distinctUntilChanged(),
+        switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
+      );
 
-    }
+    this.lessons$ = concat(initialLessons$, searchLessons$);
+  }
 
-    ngOnInit() {
-        const courseId = this.route.snapshot.params['id'];
-        this.course$ = createHttpObservable(`${APP_API.GET_COURSES}/${courseId}`);
-        this.lessons$ = createHttpObservable(`${APP_API.GET_LESSONS}${getLessonsQueryParams(courseId)}`)
-          .pipe(map(response => response.payload));
-    }
-
-    ngAfterViewInit() {
-      fromEvent<any>(this.input.nativeElement, 'keyup')
-        .pipe(
-          map(event => event['target'].value),
-          debounceTime(200),
-          distinctUntilChanged(),
-        ).subscribe(console.log);
-    }
-
-
-
-
+  loadLessons(searchTerm: string = '') : Observable<Lesson[]> {
+    return createHttpObservable(`${APP_API.GET_LESSONS}${getLessonsQueryParams(this.courseId, searchTerm)}`)
+        .pipe(map(response => response.payload));
+  }
 }
