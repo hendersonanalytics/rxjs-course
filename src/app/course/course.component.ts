@@ -38,20 +38,17 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
       this.course$ = createHttpObservable(`${APP_API.GET_COURSES}/${this.courseId}`);
-      this.lessons$ = this.loadLessons();
   }
 
   ngAfterViewInit() {
-    const initialLessons$ = this.loadLessons();
-    const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+    this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
       .pipe(
         map(event => event['target'].value),
+        startWith(''), // we put this value in the stream first, before stream emits anything
         debounceTime(200),
         distinctUntilChanged(),
         switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
       );
-
-    this.lessons$ = concat(initialLessons$, searchLessons$);
   }
 
   loadLessons(searchTerm: string = '') : Observable<Lesson[]> {
