@@ -5,13 +5,21 @@ export function createHttpObservable(url: string) : Observable<any> {
     const abortController = new AbortController();
     const {signal} = abortController;
 
+    // because fetch only hits the catch block when there is a fatal error, we
+    // need error handling outside of the catch block
     fetch(url, {signal})
       .then(async (response) => {
-        const body = await response.json();
-        observer.next(body);
-        observer.complete();
+        if (response.ok) {
+          const body = await response.json();
+          observer.next(body);
+          observer.complete();
+        } else {
+          console.log('error in observable');
+          observer.error(`${response.statusText} | error code: ${response.status}`);
+        }
       })
       .catch((err) => {
+        console.log('error in observable');
         observer.error(err);
       });
 
@@ -20,6 +28,5 @@ export function createHttpObservable(url: string) : Observable<any> {
 }
 
 export function getLessonsQueryParams(courseId: number, searchTerm: string = '') {
-
   return `?courseId=${courseId}&pageSize=100` + (searchTerm ? `&filter=${searchTerm}` : '');
 }
