@@ -13,7 +13,7 @@ import {
     withLatestFrom,
     concatAll, shareReplay, throttleTime, throttle
 } from 'rxjs/operators';
-import {merge, fromEvent, Observable, concat, of, interval} from 'rxjs';
+import {merge, fromEvent, Observable, concat, of, interval, forkJoin} from 'rxjs';
 import {Lesson} from '../model/lesson';
 import { createHttpObservable, getLessonsQueryParams } from 'app/common/util';
 import { debug, RxJsLoggingLevel, setRxJsLoggingLevel } from 'app/common/debug';
@@ -37,31 +37,27 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-      this.course$ = createHttpObservable(`${APP_API.GET_COURSES}/${this.courseId}`)
-        .pipe(debug(RxJsLoggingLevel.INFO, 'course value'));
+      const course$ = createHttpObservable(`${APP_API.GET_COURSES}/${this.courseId}`);
+      const lessons$ = this.loadLessons();
 
-      // setRxJsLoggingLevel(RxJsLoggingLevel.TRACE);
+      forkJoin([course$, lessons$])
+        .pipe(
+          tap(([course, lessons]) => {
+            console.log('course: ', course);
+            console.log('lessons: ', lessons);
+          })
+        ).subscribe();
+
   }
 
   ngAfterViewInit() {
-    // experimenting with debouncing and throttling
-    // fromEvent<any>(this.input.nativeElement, 'keyup')
-    //   .pipe(
-    //     map(event => event['target'].value),
-    //     throttleTime(500),
-    //     // debounceTime(500),
-    //     // throttle(() => interval(500)),
-    //   ).subscribe(console.log);
-
     this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
       .pipe(
         map(event => event['target'].value),
         startWith(''), // we put this value in the stream first, before stream emits anything
-        debug(RxJsLoggingLevel.TRACE, 'search '),
         debounceTime(400),
         distinctUntilChanged(),
-        switchMap((searchTerm: string) =>  this.loadLessons(searchTerm)),
-        debug(RxJsLoggingLevel.DEBUG, 'lessons value '),
+        switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
       );
   }
 
