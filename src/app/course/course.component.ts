@@ -13,7 +13,7 @@ import {
     withLatestFrom,
     concatAll, shareReplay
 } from 'rxjs/operators';
-import {merge, fromEvent, Observable, concat} from 'rxjs';
+import {merge, fromEvent, Observable, concat, of} from 'rxjs';
 import {Lesson} from '../model/lesson';
 import { createHttpObservable, getLessonsQueryParams } from 'app/common/util';
 import { APP_API } from 'app/constants/api';
@@ -28,7 +28,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
   public courseId: number = this.route.snapshot.params['id'];
   course$: Observable<Course>;
-  lessons$: Observable<Lesson[]>;
+  lessons$: Observable<Lesson[]> = of([]);
 
   @ViewChild('searchInput', { static: true }) input: ElementRef;
 
@@ -41,14 +41,21 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+    fromEvent<any>(this.input.nativeElement, 'keyup')
       .pipe(
         map(event => event['target'].value),
-        startWith(''), // we put this value in the stream first, before stream emits anything
         debounceTime(200),
-        distinctUntilChanged(),
-        switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
-      );
+      ).subscribe(console.log);
+
+
+    // this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+    //   .pipe(
+    //     map(event => event['target'].value),
+    //     startWith(''), // we put this value in the stream first, before stream emits anything
+    //     debounceTime(200),
+    //     distinctUntilChanged(),
+    //     switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
+    //   );
   }
 
   loadLessons(searchTerm: string = '') : Observable<Lesson[]> {
