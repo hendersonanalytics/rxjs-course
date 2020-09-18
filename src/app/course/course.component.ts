@@ -16,8 +16,8 @@ import {
 import {merge, fromEvent, Observable, concat, of, interval} from 'rxjs';
 import {Lesson} from '../model/lesson';
 import { createHttpObservable, getLessonsQueryParams } from 'app/common/util';
+import { debug, RxJsLoggingLevel, setRxJsLoggingLevel } from 'app/common/debug';
 import { APP_API } from 'app/constants/api';
-
 
 @Component({
     selector: 'course',
@@ -37,7 +37,10 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-      this.course$ = createHttpObservable(`${APP_API.GET_COURSES}/${this.courseId}`);
+      this.course$ = createHttpObservable(`${APP_API.GET_COURSES}/${this.courseId}`)
+        .pipe(debug(RxJsLoggingLevel.INFO, 'course value'));
+
+      // setRxJsLoggingLevel(RxJsLoggingLevel.TRACE);
   }
 
   ngAfterViewInit() {
@@ -54,9 +57,11 @@ export class CourseComponent implements OnInit, AfterViewInit {
       .pipe(
         map(event => event['target'].value),
         startWith(''), // we put this value in the stream first, before stream emits anything
-        debounceTime(200),
+        debug(RxJsLoggingLevel.TRACE, 'search '),
+        debounceTime(400),
         distinctUntilChanged(),
-        switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
+        switchMap((searchTerm: string) =>  this.loadLessons(searchTerm)),
+        debug(RxJsLoggingLevel.DEBUG, 'lessons value '),
       );
   }
 
