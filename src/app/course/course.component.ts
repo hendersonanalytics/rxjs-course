@@ -11,9 +11,9 @@ import {
     concatMap,
     switchMap,
     withLatestFrom,
-    concatAll, shareReplay
+    concatAll, shareReplay, throttleTime, throttle
 } from 'rxjs/operators';
-import {merge, fromEvent, Observable, concat, of} from 'rxjs';
+import {merge, fromEvent, Observable, concat, of, interval} from 'rxjs';
 import {Lesson} from '../model/lesson';
 import { createHttpObservable, getLessonsQueryParams } from 'app/common/util';
 import { APP_API } from 'app/constants/api';
@@ -44,7 +44,8 @@ export class CourseComponent implements OnInit, AfterViewInit {
     fromEvent<any>(this.input.nativeElement, 'keyup')
       .pipe(
         map(event => event['target'].value),
-        debounceTime(200),
+        throttleTime(500),
+        // throttle(() => interval(500)),
       ).subscribe(console.log);
 
 
