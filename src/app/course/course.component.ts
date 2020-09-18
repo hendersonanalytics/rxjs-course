@@ -41,22 +41,23 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    fromEvent<any>(this.input.nativeElement, 'keyup')
-      .pipe(
-        map(event => event['target'].value),
-        throttleTime(500),
-        // throttle(() => interval(500)),
-      ).subscribe(console.log);
-
-
-    // this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+    // experimenting with debouncing and throttling
+    // fromEvent<any>(this.input.nativeElement, 'keyup')
     //   .pipe(
     //     map(event => event['target'].value),
-    //     startWith(''), // we put this value in the stream first, before stream emits anything
-    //     debounceTime(200),
-    //     distinctUntilChanged(),
-    //     switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
-    //   );
+    //     throttleTime(500),
+    //     // debounceTime(500),
+    //     // throttle(() => interval(500)),
+    //   ).subscribe(console.log);
+
+    this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+      .pipe(
+        map(event => event['target'].value),
+        startWith(''), // we put this value in the stream first, before stream emits anything
+        debounceTime(200),
+        distinctUntilChanged(),
+        switchMap((searchTerm: string) =>  this.loadLessons(searchTerm))
+      );
   }
 
   loadLessons(searchTerm: string = '') : Observable<Lesson[]> {
