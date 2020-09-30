@@ -39,7 +39,7 @@ export class Store {
 
   selectCourseById(courseId: number) {
     return this.courses$.pipe(
-      map(courses => courses.find(course => course.id === courseId)),
+      map(courses => courses.find(course => course.id == courseId)),
       filter((course) => !!course),
     );
   }
