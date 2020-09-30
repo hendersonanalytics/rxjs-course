@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import {fromEvent} from 'rxjs';
 import {concatMap, distinctUntilChanged, exhaustMap, filter, mergeMap, tap} from 'rxjs/operators';
 import {fromPromise} from 'rxjs/internal-compatibility';
+import { Store } from 'app/common/store.service';
 
 @Component({
     selector: 'course-dialog',
@@ -13,42 +14,39 @@ import {fromPromise} from 'rxjs/internal-compatibility';
     styleUrls: ['./course-dialog.component.css']
 })
 export class CourseDialogComponent implements AfterViewInit {
+  @ViewChild('saveButton', { static: true }) saveButton: ElementRef;
+  @ViewChild('searchInput', { static: true }) searchInput : ElementRef;
+  form: FormGroup;
+  course:Course;
 
-    form: FormGroup;
+  constructor(
+      private store: Store,
+      private fb: FormBuilder,
+      private dialogRef: MatDialogRef<CourseDialogComponent>,
+      @Inject(MAT_DIALOG_DATA) course:Course ) {
 
-    course:Course;
+      this.course = course;
 
-    @ViewChild('saveButton', { static: true }) saveButton: ElementRef;
+      this.form = fb.group({
+          description: [course.description, Validators.required],
+          category: [course.category, Validators.required],
+          releasedAt: [moment(), Validators.required],
+          longDescription: [course.longDescription,Validators.required]
+      });
+  }
 
-    @ViewChild('searchInput', { static: true }) searchInput : ElementRef;
+  ngAfterViewInit() {}
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<CourseDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) course:Course ) {
+  save() {
+    this.store.saveCourse(this.course.id, this.form.value)
+      .subscribe(
+        () => this.close(),
+        (err) => console.log('error saving course', err)
+      );
+  }
 
-        this.course = course;
-
-        this.form = fb.group({
-            description: [course.description, Validators.required],
-            category: [course.category, Validators.required],
-            releasedAt: [moment(), Validators.required],
-            longDescription: [course.longDescription,Validators.required]
-        });
-
-    }
-
-    ngAfterViewInit() {
-
-
-
-    }
-
-
-
-    close() {
-        this.dialogRef.close();
-    }
-
+  close() {
+      this.dialogRef.close();
+  }
 
 }
